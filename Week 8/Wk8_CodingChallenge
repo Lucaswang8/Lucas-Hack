@@ -1,0 +1,94 @@
+
+import board
+import neopixel
+from adafruit_circuitplayground import cp
+import time
+
+
+
+
+color_list = [(255, 0, 0), (227, 28, 0),
+             (198, 57, 0), (170, 85, 0),
+             (142, 113, 0), (113, 142, 0),
+             (85, 170, 0), (57, 198, 0),
+             (28, 227, 0), (0, 255, 0)]
+
+# button_time = time.monotonic()
+# button_int = 0.1
+buttonState = 0
+prevButtonInput = False
+timeInterval = 6
+timeOut = time.monotonic()
+buttonPressTime = 0;
+resetMode = False
+
+
+while True:
+
+    # toggle button A
+    buttonInput = cp.button_a
+
+    # if time.monotonic() >= button_time:
+        # button_time += button_int
+    if buttonInput != prevButtonInput:
+        prevButtonInput = buttonInput
+        if buttonInput:
+            #mark Button pressed time
+            buttonPressTime = time.monotonic()
+        else:
+            # check if it is long pressed
+            if time.monotonic() >= buttonPressTime + 2:
+
+                print("Reseting..")
+                resetMode = True
+            # if button isn't long pressed and is short
+            else:
+                #start timer for the light
+                timeOut += timeInterval
+                #toggle button state
+                buttonState += 1
+                if buttonState > 1:
+                    buttonState = 0
+
+    #print(buttonState)
+
+
+    if buttonState == 1:
+
+        startTimer = True
+
+    else:
+        startTimer = False
+
+
+
+    if startTimer:
+        ledState = True
+        #countdown timer
+        if time.monotonic() >= timeOut:
+            timeOut += timeInterval
+            #remove led individually
+            color_list.pop(0)
+            color_list.append((0))
+
+    else:
+        ledState = False
+
+
+    if ledState:
+            #fill with gradient color
+        for index, color in enumerate(color_list, 0):
+                # ask this part to be clearer
+            if index < 10 :
+                cp.pixels[index] = color
+            else:
+                break
+        cp.pixels.show()
+
+    else:
+        cp.pixels.fill(0)
+
+
+
+
+    time.sleep(0.1)
